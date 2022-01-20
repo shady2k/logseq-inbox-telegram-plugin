@@ -36,28 +36,18 @@ async function main() {
         logseq.App.showMsg("Cannot get inbox block");
         return;
     }
-    console.log(inboxBlock);
 
     const messages = await getMessages();
-    console.log(messages);
-    console.log(messages.length);
-    if (messages.length == 0) {
+    if (!messages || messages.length === 0) {
         return;
     }
-    console.log("after");
+
     const blocks = messages.map((message) => ({ content: message }));
-
-    console.log(blocks);
-
     await logseq.Editor.insertBatchBlock(inboxBlock.uuid, blocks, {
         sibling: false,
     });
 
     logseq.App.showMsg("Messages added to inbox");
-}
-
-interface Payload {
-    offset?: number;
 }
 
 async function checkInbox(pageName: string, inboxName: string) {
@@ -109,7 +99,11 @@ async function getTodayJournal() {
     return (ret || []).flat();
 }
 
-function getMessages() {
+function getMessages(): Promise<string[] | undefined> {
+    interface Payload {
+        offset?: number;
+    }
+
     return new Promise((resolve, reject) => {
         let update_id: number;
         let messages: string[] = [];
