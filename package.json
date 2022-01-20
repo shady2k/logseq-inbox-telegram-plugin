@@ -1,0 +1,22 @@
+{
+  "name": "logseq-inbox-telegram-plugin",
+  "version": "0.0.1",
+  "description": "A Logseq plugin for read telegram chat and pull messages to daily journal",
+  "author": "shady2k",
+  "license": "MIT",
+  "scripts": {
+    "dev": "parcel ./index.html",
+    "build": "parcel build --public-url . --no-source-maps index.html"
+  },
+  "devDependencies": {
+    "@logseq/libs": "^0.0.1-alpha.31",
+    "parcel": "^2.0.0"
+  },
+  "dependencies": {
+    "axios": "^0.25.0"
+  },
+  "logseq": {
+    "main": "dist/index.html",
+    "id": "_stfhku0m9"
+  }
+}
