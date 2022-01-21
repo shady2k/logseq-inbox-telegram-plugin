@@ -37,6 +37,8 @@ async function main() {
     }
 
     console.log('[Inbox Telegram] Started!');
+    await process();
+
     if (logseqSettings.pollingInterval > 0) {
         console.log('[Inbox Telegram] Polling started!');
         setInterval(() => process(), logseqSettings.pollingInterval);
@@ -55,8 +57,8 @@ async function process() {
 
     const todayJournalPage = await getTodayJournal();
     if (
-        !todayJournalPage &&
-        todayJournalPage.length <= 0 &&
+        !todayJournalPage ||
+        todayJournalPage.length <= 0 ||
         !todayJournalPage[0].name
     ) {
         logseq.App.showMsg(
