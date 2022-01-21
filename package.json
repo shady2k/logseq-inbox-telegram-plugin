@@ -1,7 +1,7 @@
 {
   "name": "logseq-inbox-telegram-plugin",
   "version": "0.0.1",
-  "description": "A Logseq plugin for read telegram chat and pull messages to daily journal",
+  "description": "A Logseq plugin that reads Telegram chat and pull messages to daily journal",
   "author": "shady2k",
   "license": "MIT",
   "scripts": {
@@ -17,6 +17,8 @@
   },
   "logseq": {
     "main": "dist/index.html",
-    "id": "_stfhku0m9"
+    "id": "_stfhku0m9",
+    "title": "Inbox Telegram",
+    "icon": "./icon.png"
   }
 }

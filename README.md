@@ -1,26 +1,24 @@
-## A Translator Sample
+## Inbox Telegram Plugin
+This is simple plugin that get new messages from Telegram bot and paste its to daily journal.
 
-This is sample that show you how to use float ui container to display custom content.
+## Configuration
+- In order to start you need to create Telegram bot: https://core.telegram.org/bots#3-how-do-i-create-a-bot
+- Paste Telegram bot token into plugin settings `botToken`
+- You may adjust polling interval `pollingInterval` in milliseconds. This interval will be used to get new messages from Telegram bot
+- Messages will be pasted in daily journal into block with text, specified in `inboxName` property
 
-### Demo
+```json
+{
+  "disabled": false,
+  "botToken": "PASTE_BOT_TOKEN_HERE",
+  "pollingInterval": 60000,
+  "inboxName": "#inbox"
+}
+```
 
-![demo](./demo.gif)
-
-### API
-
-[![npm version](https://badge.fury.io/js/%40logseq%2Flibs.svg)](https://badge.fury.io/js/%40logseq%2Flibs)
-
-##### Logseq.App
-
-- `onInputSelectionEnd: IUserHook<{ caret: any; end: number; point: { x: number; y: number }; start: number; text: string }, IUserOffHook>`
-
-### Running the Sample
-
-> 🏷 Minimal version of App [0.4.6](https://github.com/logseq/logseq/releases/tag/0.4.6) !
-
+### Contribute
 - `yarn && yarn build` in terminal to install dependencies.
 - `Load unpacked plugin` in Logseq Desktop client.
 
 ### License
-
 MIT
