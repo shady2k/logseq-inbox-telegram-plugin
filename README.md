@@ -3,7 +3,7 @@ This is simple plugin that get new messages from Telegram bot and paste its to d
 
 ## Configuration
 - In order to start you need to create Telegram bot: https://core.telegram.org/bots#3-how-do-i-create-a-bot
-- Paste Telegram bot token into plugin settings `botToken`
+- Paste Telegram bot token into plugin settings `botToken` and **restart plugin**
 - You may adjust polling interval `pollingInterval` in milliseconds. This interval will be used to get new messages from Telegram bot
 - Messages will be pasted in daily journal into block with text, specified in `inboxName` property
 
