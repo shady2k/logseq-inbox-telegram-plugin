@@ -161,9 +161,11 @@ function getMessages(): Promise<string[] | undefined> {
           const resArr = response.data.result;
 
           resArr.forEach(
-            (element: { update_id: number; message: { text: string } }) => {
+            (element: { update_id: number; message?: { text: string } }) => {
               updateId = element.update_id;
-              messages.push(element.message.text);
+              if(element.message && element.message.text) {
+                messages.push(element.message.text);
+              }
             }
           );
 
