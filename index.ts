@@ -143,6 +143,14 @@ function getMessages(): Promise<string[] | undefined> {
     offset?: number;
   }
 
+  interface Update {
+    update_id: number;
+    message?: {
+      photo?: [];
+      text: string;
+    };
+  }
+
   return new Promise((resolve, reject) => {
     let updateId: number;
     let messages: string[] = [];
@@ -161,9 +169,13 @@ function getMessages(): Promise<string[] | undefined> {
           const resArr = response.data.result;
 
           resArr.forEach(
-            (element: { update_id: number; message?: { text: string } }) => {
+            (element: Update) => {
               updateId = element.update_id;
-              if(element.message && element.message.text) {
+              if (element.message && element.message.photo && element.message.photo.length > 0) {
+                
+              }
+
+              if (element.message && element.message.text) {
                 messages.push(element.message.text);
               }
             }
