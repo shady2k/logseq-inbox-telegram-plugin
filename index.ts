@@ -3,6 +3,29 @@ import axios from "axios";
 
 let isProcessing = false;
 
+interface IPayload {
+  offset?: number;
+}
+
+interface IUpdate {
+  update_id: number;
+  message?: {
+    text: string;
+    chat: {
+      id: number;
+    };
+  };
+}
+
+interface IMessagesList {
+  chatId: number;
+  text: string;
+}
+
+interface IGroup {
+  [key: string]: string[];
+}
+
 /**
  * main entry
  */
@@ -29,6 +52,26 @@ async function main() {
     });
   }
 
+  if (!logseq.settings!.inboxByChat) {
+    await logseq.updateSettings({
+      inboxByChat: [],
+    });
+  } else {
+    // Dirty hack, because Logseq has bug while working with arrays
+    const newInboxByChat = logseq.settings!.inboxByChat.filter(
+      (value: { chatId: number; }, index: number, self: { chatId: number; }[]) =>
+        index === self.findIndex((t: { chatId: number; }) => t.chatId === value.chatId)
+    );
+
+    await logseq.updateSettings({
+      inboxByChat: {},
+    });
+
+    await logseq.updateSettings({
+      inboxByChat: newInboxByChat,
+    });
+  }
+
   if (!logseqSettings.botToken) {
     logseq.App.showMsg("[Inbox Telegram] You should change plugin settings");
     return;
@@ -37,7 +80,7 @@ async function main() {
   console.log("[Inbox Telegram] Started!");
   setTimeout(() => {
     process();
-  }, 5000);
+  }, 3000);
 
   if (logseqSettings.pollingInterval > 0) {
     startPolling();
@@ -73,8 +116,68 @@ async function process() {
     return;
   }
 
-  const inboxName = logseq.settings!.inboxName || "#inbox";
-  const inboxBlock = await checkInbox(todayJournalPage[0].name, inboxName);
+  const defaultInboxName = logseq.settings!.inboxName || "#inbox";
+  const inboxByChat = logseq.settings!.inboxByChat;
+
+  function getInboxByChatId(chatId: number): string {
+    if (!inboxByChat) return defaultInboxName;
+    const obj = inboxByChat.find(
+      (item: { chatId: number }) => item.chatId === chatId
+    );
+    if (obj && obj.inboxName && obj.inboxName !== "") {
+      return obj.inboxName;
+    } else {
+      return defaultInboxName;
+    }
+  }
+
+  const grouped = messages.reduce(
+    (groups, item) => ({
+      ...groups,
+      [getInboxByChatId(item.chatId)]: [
+        ...(groups[getInboxByChatId(item.chatId)] || []),
+        item.text,
+      ],
+    }),
+    {} as IGroup
+  );
+
+  Object.entries(grouped).forEach(async ([inboxName, messages]) => {
+    await insertMessages(todayJournalPage[0].name, inboxName, messages);
+  });
+
+  logseq.App.showMsg("[Inbox Telegram] Messages added to inbox", "success");
+
+  const uniqueChats = [...new Set(messages.map((item) => item.chatId))];
+  const newInboxByChat = inboxByChat.slice();
+  uniqueChats.forEach(async (chatId) => {
+    const obj = inboxByChat.find(
+      (item: { chatId: number }) => item.chatId === chatId
+    );
+    if (!obj) {
+      newInboxByChat.push({
+        chatId,
+        inboxName: defaultInboxName,
+      });
+    }
+  });
+
+  // Dirty hack, because Logseq has bug while working with arrays
+  await logseq.updateSettings({
+    inboxByChat: {},
+  });
+
+  await logseq.updateSettings({
+    inboxByChat: newInboxByChat,
+  });
+}
+
+async function insertMessages(
+  todayJournalPageName: string,
+  inboxName: string,
+  messages: string[]
+) {
+  const inboxBlock = await checkInbox(todayJournalPageName, inboxName);
   if (!inboxBlock) {
     isProcessing = false;
     logseq.App.showMsg("[Inbox Telegram] Cannot get inbox block", "error");
@@ -87,7 +190,6 @@ async function process() {
   });
 
   isProcessing = false;
-  logseq.App.showMsg("[Inbox Telegram] Messages added to inbox", "success");
 }
 
 async function checkInbox(pageName: string, inboxName: string) {
@@ -138,17 +240,13 @@ async function getTodayJournal() {
   return (ret || []).flat();
 }
 
-function getMessages(): Promise<string[] | undefined> {
-  interface Payload {
-    offset?: number;
-  }
-
+function getMessages(): Promise<IMessagesList[] | undefined> {
   return new Promise((resolve, reject) => {
     let updateId: number;
-    let messages: string[] = [];
+    let messages: IMessagesList[] = [];
     const botToken = logseq.settings!.botToken;
 
-    const payload: Payload = {
+    const payload: IPayload = {
       ...(logseq.settings!.updateId && {
         offset: logseq.settings!.updateId + 1,
       }),
@@ -156,20 +254,21 @@ function getMessages(): Promise<string[] | undefined> {
 
     axios
       .post(`https://api.telegram.org/bot${botToken}/getUpdates`, payload)
-      .then(function (response) {
+      .then(async function (response) {
         if (response && response.data && response.data.ok) {
           const resArr = response.data.result;
 
-          resArr.forEach(
-            (element: { update_id: number; message?: { text: string } }) => {
-              updateId = element.update_id;
-              if(element.message && element.message.text) {
-                messages.push(element.message.text);
-              }
+          resArr.forEach((element: IUpdate) => {
+            updateId = element.update_id;
+            if (element.message && element.message.text) {
+              messages.push({
+                chatId: element.message.chat.id,
+                text: element.message.text,
+              });
             }
-          );
+          });
 
-          logseq.updateSettings({
+          await logseq.updateSettings({
             updateId,
           });
 
