@@ -46,7 +46,7 @@ async function main() {
         isDebug = true;
     }
 
-    if (!logseqSettings.inboxName) {
+    if (!logseqSettings.hasOwnProperty("inboxName")) {
         await logseq.updateSettings({
             inboxName: "#inbox",
         });
@@ -148,7 +148,7 @@ async function process() {
         return;
     }
 
-    const defaultInboxName = logseq.settings!.inboxName || "#inbox";
+    const defaultInboxName = logseq.settings!.inboxName || null;
     const inboxByChat = logseq.settings!.inboxByChat;
 
     function getInboxByChatId(chatId: number): string {
@@ -206,7 +206,7 @@ async function process() {
 
 async function insertMessages(
     todayJournalPageName: string,
-    inboxName: string,
+    inboxName: string | null,
     messages: string[]
 ) {
     const inboxBlock = await checkInbox(todayJournalPageName, inboxName);
@@ -217,15 +217,29 @@ async function insertMessages(
     }
 
     const blocks = messages.map((message) => ({ content: message }));
-    await logseq.Editor.insertBatchBlock(inboxBlock.uuid, blocks, {
-        sibling: false,
-    });
+
+    const params = {
+      sibling: false,
+    };
+
+    if (inboxName === null || inboxName === "null") {
+      params.sibling = true;
+    }
+
+    log({ inboxBlock, blocks, params });
+    await logseq.Editor.insertBatchBlock(inboxBlock.uuid, blocks, params);
 
     isProcessing = false;
 }
 
-async function checkInbox(pageName: string, inboxName: string) {
+async function checkInbox(pageName: string, inboxName: string | null) {
+    log({ pageName, inboxName });
     const pageBlocksTree = await logseq.Editor.getPageBlocksTree(pageName);
+
+    if (inboxName === null || inboxName === "null") {
+        log("No group");
+        return pageBlocksTree[0];
+    }
 
     let inboxBlock;
     inboxBlock = pageBlocksTree.find((block) => {
