@@ -16,8 +16,42 @@ Create a bot with BotFather, which is essentially a bot used to create other bot
   "disabled": false,
   "botToken": "PASTE_BOT_TOKEN_HERE",
   "pollingInterval": 60000,
-  "inboxName": "#inbox"
+  "inboxName": "#inbox",
+  "inboxByChat": []
 }
+```
+
+## Multiple inboxes
+For example you want to collect random thoughts as `#spark` and other thoughts as `#plans`.
+- Write BotFather `/setprivacy` command and set it to `DISABLED`
+- Also check `/setjoingroups` it will be `ENABLED`
+- Create new group in Telegram and add your bot there
+- Write any message in this group
+- In your plugin settings in `inboxByChat` will be added new object
+```json
+"inboxByChat": [
+  {
+    "chatId": -111111111,
+    "inboxName": "#spark"
+  }
+]
+```
+- Disable plugin
+- Change `inboxName` in this object to `#spark` for example
+- Enable plugin
+- New messages received from this group will be added under `#spark` tag
+- You can add additional groups if you want
+```json
+"inboxByChat": [
+  {
+    "chatId": -111111111,
+    "inboxName": "#spark"
+  },
+  {
+    "chatId": -222222222,
+    "inboxName": "#plans"
+  }
+]
 ```
 
 ### Contribute
