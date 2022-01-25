@@ -6,11 +6,12 @@ This is simple plugin that get new messages from Telegram bot and paste its to d
 Create a bot with BotFather, which is essentially a bot used to create other bots. The command you need is `/newbot`. After you choose title, BotFaher give you the token. 
 - Paste Telegram bot token into plugin settings `botToken`
 - You may adjust polling interval `pollingInterval` in milliseconds. This interval will be used to get new messages from Telegram bot
-- Messages will be pasted in daily journal into block with text, specified in `inboxName` property. Replace it in case of neccessary
+- Messages will be pasted in daily journal into block with text, specified in `inboxName` property. Replace it in case of necessary. If you don't want to group messages, set `inboxName` property to `null`. In this case messages will be inserted directly into page block.
 - **Restart plugin in Logseq**
 - After that just open chat with your bot in Telegram and type `/start` command
 - Then write any message in this chat, it will be added to your Logseq daily journal within 60 seconds (by default)
 
+Settings with grouping:
 ```json
 {
   "disabled": false,
@@ -18,6 +19,13 @@ Create a bot with BotFather, which is essentially a bot used to create other bot
   "pollingInterval": 60000,
   "inboxName": "#inbox",
   "inboxByChat": []
+}
+```
+
+Set `inboxName` with `null` if you don't want use groups:
+```json
+{
+  "inboxName": null
 }
 ```
 
