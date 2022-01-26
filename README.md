@@ -7,6 +7,7 @@ Create a bot with BotFather, which is essentially a bot used to create other bot
 - Paste Telegram bot token into plugin settings `botToken`
 - You may adjust polling interval `pollingInterval` in milliseconds. This interval will be used to get new messages from Telegram bot
 - Messages will be pasted in daily journal into block with text, specified in `inboxName` property. Replace it in case of necessary. If you don't want to group messages, set `inboxName` property to `null`. In this case messages will be inserted directly into page block.
+- If `addTimestamp` set to true, message received time in format `HH:mm` will be added to message text, for example `21:13 - Test message`
 - **Restart plugin in Logseq**
 - After that just open chat with your bot in Telegram and type `/start` command
 - Then write any message in this chat, it will be added to your Logseq daily journal within 60 seconds (by default)
@@ -16,6 +17,7 @@ Settings with grouping:
 {
   "disabled": false,
   "botToken": "PASTE_BOT_TOKEN_HERE",
+  "addTimestamp": false,
   "pollingInterval": 60000,
   "inboxName": "#inbox",
   "inboxByChat": []
