@@ -14,6 +14,9 @@ interface IUpdate {
   message?: {
     date: number;
     text: string;
+    from: {
+      username: string;
+    };
     chat: {
       id: number;
     };
@@ -57,6 +60,12 @@ async function main() {
   if (!logseqSettings.hasOwnProperty("addTimestamp")) {
     await logseq.updateSettings({
       addTimestamp: false,
+    });
+  }
+
+  if (!logseqSettings.hasOwnProperty("authorizedUsers")) {
+    await logseq.updateSettings({
+      authorizedUsers: [],
     });
   }
 
@@ -306,7 +315,24 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
 
           resArr.forEach((element: IUpdate) => {
             updateId = element.update_id;
-            if (element.message && element.message.text && element.message.date) {
+            if (
+              element.message &&
+              element.message.text &&
+              element.message.date &&
+              element.message.from.username
+            ) {
+              const authorizedUsers: string[] =
+                logseq.settings!.authorizedUsers;
+              if (authorizedUsers && authorizedUsers.length > 0) {
+                if (!authorizedUsers.includes(element.message.from.username)) {
+                  log({
+                    name: "Ignore messages, user not authorized",
+                    element,
+                  });
+                  return;
+                }
+              }
+
               const text = ((telegramText: string, addTimestamp: boolean) => {
                 if (addTimestamp) {
                   return `${dayjs
