@@ -33,6 +33,10 @@ Set `inboxName` with `null` if you don't want use groups:
 }
 ```
 
+## Usage notice
+- Please, consider that messages will be pulled from Telegram only if Logseq desktop application running.
+- If you doesn't open Logseq application more than 24 hours, messages from Telegram will be lost and you need to resend it.
+
 ## Multiple inboxes
 For example you want to collect random thoughts as `#spark` and other thoughts as `#plans`.
 - Write BotFather `/setprivacy` command and set it to `DISABLED`
