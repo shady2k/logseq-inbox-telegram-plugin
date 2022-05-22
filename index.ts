@@ -1,6 +1,6 @@
 import "@logseq/libs";
 import axios from "axios";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 let isProcessing = false;
 let isDebug = false;
@@ -251,19 +251,43 @@ async function checkInbox(pageName: string, inboxName: string | null) {
   }
 
   let inboxBlock;
-  inboxBlock = pageBlocksTree.find((block) => {
+  inboxBlock = pageBlocksTree.find((block: { content: string; }) => {
     return block.content === inboxName;
   });
 
   if (!inboxBlock) {
-    const newInboxBlock = await logseq.Editor.insertBlock(
-      pageBlocksTree[0].uuid,
-      inboxName,
-      {
-        before: true,
+    if (pageBlocksTree.length === 1) {
+      if (!pageBlocksTree[0].content) {
+        const newInboxBlock = await logseq.Editor.insertBlock(
+          pageBlocksTree[0].uuid,
+          inboxName,
+          {
+            before: true,
+          }
+        );
+        return newInboxBlock;
+      } else {
+        const newInboxBlock = await logseq.Editor.insertBlock(
+          pageBlocksTree[0].uuid,
+          inboxName,
+          {
+            before: false,
+          }
+        );
+        return newInboxBlock;
       }
-    );
-    return newInboxBlock;
+    } else if (pageBlocksTree.length > 1) {
+      const newInboxBlock = await logseq.Editor.insertBlock(
+        pageBlocksTree[pageBlocksTree.length - 1].uuid,
+        inboxName,
+        {
+          before: false,
+        }
+      );
+      return newInboxBlock;
+    } else {
+      logseq.App.showMsg("[Inbox Telegram] Unexpected error, please report about it", "error");
+    }
   } else {
     return inboxBlock;
   }
