@@ -83,21 +83,6 @@ async function main() {
     await logseq.updateSettings({
       inboxByChat: [],
     });
-  } else {
-    // Dirty hack, because Logseq has bug while working with arrays
-    const newInboxByChat = logseq.settings!.inboxByChat.filter(
-      (value: { chatId: number }, index: number, self: { chatId: number }[]) =>
-        index ===
-        self.findIndex((t: { chatId: number }) => t.chatId === value.chatId)
-    );
-
-    await logseq.updateSettings({
-      inboxByChat: {},
-    });
-
-    await logseq.updateSettings({
-      inboxByChat: newInboxByChat,
-    });
   }
 
   if (!logseqSettings.botToken) {
@@ -265,11 +250,6 @@ async function process() {
         inboxName: defaultInboxName,
       });
     }
-  });
-
-  // Dirty hack, because Logseq has bug while working with arrays
-  await logseq.updateSettings({
-    inboxByChat: {},
   });
 
   await logseq.updateSettings({
