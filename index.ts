@@ -1,4 +1,5 @@
 import "@logseq/libs";
+import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin.user";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -82,27 +83,14 @@ async function main() {
     await logseq.updateSettings({
       inboxByChat: [],
     });
-  } else {
-    // Dirty hack, because Logseq has bug while working with arrays
-    const newInboxByChat = logseq.settings!.inboxByChat.filter(
-      (value: { chatId: number }, index: number, self: { chatId: number }[]) =>
-        index ===
-        self.findIndex((t: { chatId: number }) => t.chatId === value.chatId)
-    );
-
-    await logseq.updateSettings({
-      inboxByChat: {},
-    });
-
-    await logseq.updateSettings({
-      inboxByChat: newInboxByChat,
-    });
   }
 
   if (!logseqSettings.botToken) {
     logseq.App.showMsg("[Inbox Telegram] You should change plugin settings");
     return;
   }
+
+  applySettingsSchema();
 
   console.log("[Inbox Telegram] Started!");
   setTimeout(() => {
@@ -112,6 +100,67 @@ async function main() {
   if (logseqSettings.pollingInterval > 0) {
     startPolling();
   }
+}
+
+function applySettingsSchema() {
+  const settings: SettingSchemaDesc[] = [
+    {
+      key: "botToken",
+      description: "Telegram Bot token",
+      type: "string",
+      default: "",
+      title: "Bot token",
+    },
+    {
+      key: "pollingInterval",
+      description:
+        "This interval will be used to get new messages from Telegram bot",
+      type: "number",
+      default: 600000,
+      title: "Polling interval (milliseconds)",
+    },
+    {
+      key: "inboxName",
+      description:
+        "Messages will be pasted in daily journal into block with text, specified in inboxName property. Replace it in case of necessary. If you don't want to group messages, set inboxName property to null. In this case messages will be inserted directly into page block",
+      type: "string",
+      default: "#inbox",
+      title: "Title in daily journal",
+    },
+    {
+      key: "authorizedUsers",
+      description:
+        'Be sure to add your username in authorizedUsers array, because your recently created bot is publicly findable and other peoples may send messages to your bot. For example "authorizedUsers": ["your_username"]. If you leave this array empty - all messages from all users will be processed!',
+      type: "object",
+      default: [],
+      title: "authorizedUsers",
+    },
+    {
+      key: "addTimestamp",
+      description:
+        "If this set to true, message received time in format HH:mm will be added to message text, for example 21:13 - Test message",
+      type: "boolean",
+      default: false,
+      title: "Add timestamp",
+    },
+    {
+      key: "inboxByChat",
+      description:
+        "Allows to set multiple inboxes, more information at https://github.com/shady2k/logseq-inbox-telegram-plugin#multiple-inboxes",
+      type: "object",
+      default: [],
+      title: "Allows to set multiple inboxes",
+    },
+    {
+      key: "isDebug",
+      description:
+        "Debug mode. Usually you don't need this. Use it if you are developer or developers asks you to turn this on",
+      type: "boolean",
+      default: false,
+      title: "Debug mode",
+    },
+  ];
+  logseq.useSettingsSchema(settings);
 }
 
 function startPolling() {
@@ -203,11 +252,6 @@ async function process() {
     }
   });
 
-  // Dirty hack, because Logseq has bug while working with arrays
-  await logseq.updateSettings({
-    inboxByChat: {},
-  });
-
   await logseq.updateSettings({
     inboxByChat: newInboxByChat,
   });
@@ -251,7 +295,7 @@ async function checkInbox(pageName: string, inboxName: string | null) {
   }
 
   let inboxBlock;
-  inboxBlock = pageBlocksTree.find((block: { content: string; }) => {
+  inboxBlock = pageBlocksTree.find((block: { content: string }) => {
     return block.content === inboxName;
   });
 
@@ -286,7 +330,10 @@ async function checkInbox(pageName: string, inboxName: string | null) {
       );
       return newInboxBlock;
     } else {
-      logseq.App.showMsg("[Inbox Telegram] Unexpected error, please report about it", "error");
+      logseq.App.showMsg(
+        "[Inbox Telegram] Unexpected error, please report about it",
+        "error"
+      );
     }
   } else {
     return inboxBlock;
