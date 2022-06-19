@@ -307,41 +307,15 @@ async function checkInbox(pageName: string, inboxName: string | null) {
   });
 
   if (!inboxBlock) {
-    if (pageBlocksTree.length === 1) {
-      if (!pageBlocksTree[0].content) {
-        const newInboxBlock = await logseq.Editor.insertBlock(
-          pageBlocksTree[0].uuid,
-          inboxName,
-          {
-            before: true,
-          }
-        );
-        return newInboxBlock;
-      } else {
-        const newInboxBlock = await logseq.Editor.insertBlock(
-          pageBlocksTree[0].uuid,
-          inboxName,
-          {
-            before: false,
-          }
-        );
-        return newInboxBlock;
+    const newInboxBlock = await logseq.Editor.insertBlock(
+      pageBlocksTree[0].uuid,
+      inboxName,
+      {
+        before: pageBlocksTree[0].content ? false : true,
+        sibling: true
       }
-    } else if (pageBlocksTree.length > 1) {
-      const newInboxBlock = await logseq.Editor.insertBlock(
-        pageBlocksTree[pageBlocksTree.length - 1].uuid,
-        inboxName,
-        {
-          before: false,
-        }
-      );
-      return newInboxBlock;
-    } else {
-      logseq.App.showMsg(
-        "[Inbox Telegram] Unexpected error, please report about it",
-        "error"
-      );
-    }
+    );
+    return newInboxBlock;
   } else {
     return inboxBlock;
   }
