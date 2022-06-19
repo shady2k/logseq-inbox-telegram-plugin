@@ -20,8 +20,15 @@ interface IUpdate {
     };
     chat: {
       id: number;
-    };
-  };
+    }
+  },
+  channel_post?: {
+    date: number;
+    text: string;
+    chat: {
+      id: number;
+    }
+  }
 }
 
 interface IMessagesList {
@@ -415,12 +422,38 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
               })(element.message.text, logseq.settings!.addTimestamp);
 
               log({
-                name: "Push in messages",
+                name: "Push in group messages",
                 element: element.message.chat.id,
                 text,
               });
               messages.push({
                 chatId: element.message.chat.id,
+                text,
+              });
+            }
+
+            if (
+              element.channel_post &&
+              element.channel_post.text &&
+              element.channel_post.date
+            ) {
+              const text = ((telegramText: string, addTimestamp: boolean) => {
+                if (addTimestamp) {
+                  return `${dayjs
+                    .unix(element.channel_post.date)
+                    .format("HH:mm")} - ${telegramText}`;
+                } else {
+                  return telegramText;
+                }
+              })(element.channel_post.text, logseq.settings!.addTimestamp);
+
+              log({
+                name: "Push in channel messages",
+                element: element.channel_post.chat.id,
+                text,
+              });
+              messages.push({
+                chatId: element.channel_post.chat.id,
                 text,
               });
             }
