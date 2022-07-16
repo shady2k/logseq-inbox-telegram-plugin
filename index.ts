@@ -1,5 +1,5 @@
 import "@logseq/libs";
-import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin.user";
+import { BlockEntity, SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin.user";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -62,6 +62,12 @@ async function main() {
   if (!logseqSettings.hasOwnProperty("inboxName")) {
     await logseq.updateSettings({
       inboxName: "#inbox",
+    });
+  }
+
+  if (!logseqSettings.hasOwnProperty("invertMessagesOrder")) {
+    await logseq.updateSettings({
+      invertMessagesOrder: false,
     });
   }
 
@@ -149,6 +155,14 @@ function applySettingsSchema() {
       type: "boolean",
       default: false,
       title: "Add timestamp",
+    },
+    {
+      key: "invertMessagesOrder",
+      description:
+        "New messages adds to the top of node by default, this setting will inverse the order of added messages, new messages will be added to the bottom of node",
+      type: "boolean",
+      default: false,
+      title: "Invert messages order",
     },
     {
       key: "inboxByChat",
@@ -277,17 +291,30 @@ async function insertMessages(
   }
 
   const blocks = messages.map((message) => ({ content: message }));
-
   const params = {
     sibling: false,
+    before: true
   };
+
+  let targetBlock = inboxBlock.uuid;
+ 
+  if (logseq.settings!.invertMessagesOrder) {
+    const inboxBlockTree = await logseq.Editor.getBlock(inboxBlock.uuid, { includeChildren: true });
+    if (inboxBlockTree && inboxBlockTree.children && inboxBlockTree?.children?.length > 0) {
+      const block = inboxBlockTree?.children[inboxBlockTree?.children?.length - 1] as BlockEntity
+      if (block && block.uuid) {
+        targetBlock = block.uuid
+        params.sibling = true
+      }
+    }
+  }
 
   if (inboxName === null || inboxName === "null") {
     params.sibling = true;
   }
 
   log({ inboxBlock, blocks, params });
-  await logseq.Editor.insertBatchBlock(inboxBlock.uuid, blocks, params);
+  await logseq.Editor.insertBatchBlock(targetBlock, blocks, params);
 
   isProcessing = false;
 }
