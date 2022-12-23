@@ -51,7 +51,7 @@ async function main() {
   const logseqSettings = logseq.settings;
 
   if (!logseqSettings) {
-    logseq.App.showMsg("[Inbox Telegram] Cannot get settings", "error");
+    logseq.UI.showMsg("[Inbox Telegram] Cannot get settings", "error");
     return;
   }
 
@@ -98,12 +98,18 @@ async function main() {
     });
   }
 
-  if (!logseqSettings.botToken) {
-    logseq.App.showMsg("[Inbox Telegram] You should change plugin settings");
-    return;
+  if (!logseqSettings.hasOwnProperty("botToken")) {
+    await logseq.updateSettings({
+      botToken: "",
+    });
   }
 
   applySettingsSchema();
+
+  if (!logseqSettings.botToken) {
+    logseq.UI.showMsg("[Inbox Telegram] You should change plugin settings");
+    return;
+  }
 
   console.log("[Inbox Telegram] Started!");
   setTimeout(() => {
@@ -119,7 +125,7 @@ function applySettingsSchema() {
   const settings: SettingSchemaDesc[] = [
     {
       key: "botToken",
-      description: "Telegram Bot token",
+      description: "Telegram Bot token. In order to start you need to create Telegram bot: https://core.telegram.org/bots#3-how-do-i-create-a-bot. Create a bot with BotFather, which is essentially a bot used to create other bots. The command you need is /newbot. After you choose title, BotFaher give you the token",
       type: "string",
       default: "",
       title: "Bot token",
@@ -143,7 +149,7 @@ function applySettingsSchema() {
     {
       key: "authorizedUsers",
       description:
-        'Be sure to add your username in authorizedUsers array, because your recently created bot is publicly findable and other peoples may send messages to your bot. For example "authorizedUsers": ["your_username"]. If you leave this array empty - all messages from all users will be processed!',
+        "Be sure to add your username in authorizedUsers array, because your recently created bot is publicly findable and other peoples may send messages to your bot. For example \"authorizedUsers\": [\"your_username\"]. If you leave this array empty - all messages from all users will be processed!",
       type: "object",
       default: [],
       title: "authorizedUsers",
@@ -219,7 +225,7 @@ async function process() {
     todayJournalPage.length <= 0 ||
     !todayJournalPage[0].name
   ) {
-    logseq.App.showMsg(
+    logseq.UI.showMsg(
       "[Inbox Telegram] Cannot get today's journal page",
       "error"
     );
@@ -257,7 +263,7 @@ async function process() {
     await insertMessages(todayJournalPage[0].name, inboxName, messages);
   });
 
-  logseq.App.showMsg("[Inbox Telegram] Messages added to inbox", "success");
+  logseq.UI.showMsg("[Inbox Telegram] Messages added to inbox", "success");
 
   const uniqueChats = [...new Set(messages.map((item) => item.chatId))];
   const newInboxByChat = inboxByChat.slice();
@@ -286,7 +292,7 @@ async function insertMessages(
   const inboxBlock = await checkInbox(todayJournalPageName, inboxName);
   if (!inboxBlock) {
     isProcessing = false;
-    logseq.App.showMsg("[Inbox Telegram] Cannot get inbox block", "error");
+    logseq.UI.showMsg("[Inbox Telegram] Cannot get inbox block", "error");
     return;
   }
 
@@ -466,7 +472,7 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
 
           resolve(messages);
         } else {
-          logseq.App.showMsg(
+          logseq.UI.showMsg(
             "[Inbox Telegram] Unable to parse Telegram response",
             "error"
           );
