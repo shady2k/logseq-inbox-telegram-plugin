@@ -341,10 +341,10 @@ async function checkInbox(pageName: string, inboxName: string | null) {
 
   if (!inboxBlock) {
     const newInboxBlock = await logseq.Editor.insertBlock(
-      pageBlocksTree[0].uuid,
+      pageBlocksTree[pageBlocksTree.length - 1].uuid,
       inboxName,
       {
-        before: pageBlocksTree[0].content ? false : true,
+        before: pageBlocksTree[pageBlocksTree.length - 1].content ? false : true,
         sibling: true
       }
     );
@@ -480,7 +480,7 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
         }
       })
       .catch(function (error) {
-        console.log(error);
+        console.error(error);
         reject(error);
       });
   });
