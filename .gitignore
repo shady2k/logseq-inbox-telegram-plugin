@@ -12,7 +12,7 @@ node_modules/*
 
 # Optional cache directory
 .parcel-cache/
-.yarn
+.yarn/
 
 # Dist folder
 dist/
