@@ -5,12 +5,14 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+.yarnrc.yml
 
 # Dependency directories
 node_modules/*
 
 # Optional cache directory
 .parcel-cache/
+.yarn
 
 # Dist folder
 dist/

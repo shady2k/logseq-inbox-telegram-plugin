@@ -9,12 +9,12 @@
     "build": "parcel build --public-url . --no-source-maps index.html"
   },
   "devDependencies": {
-    "parcel": "^2.0.0"
+    "parcel": "^2.8.3"
   },
   "dependencies": {
-    "axios": "^0.25.0",
-    "dayjs": "^1.10.7",
-    "@logseq/libs": "^0.0.6"
+    "@logseq/libs": "^0.0.14",
+    "axios": "^1.3.2",
+    "dayjs": "^1.11.7"
   },
   "logseq": {
     "main": "dist/index.html",
