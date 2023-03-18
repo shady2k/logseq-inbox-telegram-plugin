@@ -8,7 +8,8 @@ Create a bot with BotFather, which is essentially a bot used to create other bot
 - Be sure to add your username in `authorizedUsers` array, because your recently created bot is publicly findable and other peoples may send messages to your bot. For example `"authorizedUsers": ["your_username"]`. **If you leave this array empty - all messages from all users will be processed!**
 - You may adjust polling interval `pollingInterval` in milliseconds. This interval will be used to get new messages from Telegram bot
 - Messages will be pasted in daily journal into block with text, specified in `inboxName` property. Replace it in case of necessary. If you don't want to group messages, set `inboxName` property to `null`. In this case messages will be inserted directly into page block.
-- If `addTimestamp` set to true, message received time in format `HH:mm` will be added to message text, for example `21:13 - Test message`
+- If `addTimestamp` is set to true, message received time in format `HH:mm` will be added to message text, for example `21:13 - Test message`
+- If `useActiveGraph` is set to true, all messages will be processed in the currently active graph. If `useActiveGraph` is set to false, messages will be processed only if the `botTargetGraph` graph name is equal to the currently active graph. If the `botTargetGraph` is not equal to the current graph, the plugin will skip processing and your messages will be processed when you switch back to the required graph.
 - **Restart plugin in Logseq**
 - After that just open chat with your bot in Telegram and type `/start` command
 - Then write any message in this chat, it will be added to your Logseq daily journal within 60 seconds (by default)
@@ -19,6 +20,7 @@ Settings with grouping:
   "disabled": false,
   "botToken": "PASTE_BOT_TOKEN_HERE",
   "authorizedUsers": [],
+  "useActiveGraph": true,
   "addTimestamp": false,
   "pollingInterval": 60000,
   "inboxName": "#inbox",
