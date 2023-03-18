@@ -155,6 +155,20 @@ function applySettingsSchema() {
       title: "authorizedUsers",
     },
     {
+      key: "useActiveGraph",
+      description: "If enabled, bot messages will be sent to the currently active graph",
+      type: "boolean",
+      default: true,
+      title: "Paste messages to currently active graph",
+    },
+    {
+      key: "botTargetGraph",
+      description: "Specify the graph where bot messages should be received, used only if useActiveGraph is false",
+      type: "string",
+      default: "",
+      title: "Bot Target Graph",
+    },
+    {
       key: "addTimestamp",
       description:
         "If this set to true, message received time in format HH:mm will be added to message text, for example 21:13 - Test message",
@@ -197,10 +211,21 @@ function startPolling() {
 
 async function process() {
   log("Processing");
+
+  if (!logseq.settings!.useActiveGraph) {
+    const botTargetGraph = logseq.settings!.botTargetGraph;
+    const currentGraph = await logseq.App.getCurrentGraph();
+    if (currentGraph?.name !== botTargetGraph) {
+      log(`Not in the bot target graph: ${botTargetGraph}, current graph: ${currentGraph?.name}, skipped`);
+      return;
+    }
+  }
+
   if (isProcessing) {
-    log("Processing skipped");
+    log("Already running, processing skipped");
     return;
   }
+
   isProcessing = true;
 
   const messages = await (async () => {
