@@ -380,6 +380,14 @@ async function checkInbox(pageName: string, inboxName: string | null) {
 }
 
 async function getTodayJournal() {
+  const d = new Date();
+  const todayDateObj = {
+    day: `${d.getDate()}`.padStart(2, "0"),
+    month: `${d.getMonth() + 1}`.padStart(2, "0"),
+    year: d.getFullYear(),
+  };
+  const todayDate = `${todayDateObj.year}${todayDateObj.month}${todayDateObj.day}`;
+
   let ret;
   try {
     ret = await logseq.DB.datascriptQuery(`
@@ -388,7 +396,7 @@ async function getTodayJournal() {
        [?b :block/page ?p]
        [?p :block/journal? true]
        [?p :block/journal-day ?d]
-       [(= ?d ?today)]]
+       [(= ?d ${todayDate})]]
     `);
   } catch (e) {
     console.error(e);
