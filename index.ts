@@ -340,8 +340,11 @@ async function insertMessages(
     }
   }
 
-  if (inboxName === null || inboxName === "null") {
+  if (inboxName === null || inboxName === "null" || inboxName === "") {
     params.sibling = true;
+    if (logseq.settings!.invertMessagesOrder) {
+      params.before = false
+    }
   }
 
   log({ inboxBlock, blocks, params });
@@ -354,7 +357,7 @@ async function checkInbox(pageName: string, inboxName: string | null) {
   log({ pageName, inboxName });
   const pageBlocksTree = await logseq.Editor.getPageBlocksTree(pageName);
 
-  if (inboxName === null || inboxName === "null") {
+  if (inboxName === null || inboxName === "null" || inboxName === "") {
     log("No group");
     return pageBlocksTree[0];
   }
