@@ -147,6 +147,13 @@ function applySettingsSchema() {
       title: "Title in daily journal",
     },
     {
+      key: "withoutAuthorizedUsers",
+      description: "⚠️ RISK: Any message who send to bot will be handled. Learn more in readme file. If enabled, all messages will be pasted in graph.",
+      type: "boolean",
+      default: false,
+      title: "Forward all message without authorizedUsers",
+    },
+    {
       key: "authorizedUsers",
       description:
         "Be sure to add your username in authorizedUsers array, because your recently created bot is publicly findable and other peoples may send messages to your bot. For example \"authorizedUsers\": [\"your_username\"]. If you leave this array empty - all messages from all users will be processed!",
@@ -431,18 +438,26 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
             if (
               element.message &&
               element.message.text &&
-              element.message.date &&
-              element.message.from.username
+              element.message.date
             ) {
-              const authorizedUsers: string[] =
-                logseq.settings!.authorizedUsers;
-              if (authorizedUsers && authorizedUsers.length > 0) {
-                if (!authorizedUsers.includes(element.message.from.username)) {
-                  log({
-                    name: "Ignore messages, user not authorized",
-                    element,
-                  });
+              const withoutAuthorizedUsers: boolean =
+                logseq.settings!.withoutAuthorizedUsers;
+              if(!withoutAuthorizedUsers) {
+                if(!element.message.from.username) {
+                  // NOTE: when not set all messages forwards setting && without username, do nothing
                   return;
+                }
+
+                const authorizedUsers: string[] =
+                  logseq.settings!.authorizedUsers;
+                if (authorizedUsers && authorizedUsers.length > 0) {
+                  if (!authorizedUsers.includes(element.message.from.username)) {
+                    log({
+                      name: "Ignore messages, user not authorized",
+                      element,
+                    });
+                    return;
+                  }
                 }
               }
 

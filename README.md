@@ -35,6 +35,9 @@ Set `inboxName` with `null` if you don't want use groups:
 }
 ```
 
+> [!IMPORTANT]
+> If you want to forwards all messages, enable `withoutAuthorizedUsers`. But you should know risk, all messages including others using this message also would be handled, because without authorization.
+
 ## Usage notice
 - Please, consider that messages will be pulled from Telegram only if Logseq desktop application running.
 - If you doesn't open Logseq application more than 24 hours, messages from Telegram will be lost and you need to resend it.
