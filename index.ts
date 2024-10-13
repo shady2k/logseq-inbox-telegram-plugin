@@ -433,7 +433,10 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
         if (response && response.data && response.data.ok) {
           const resArr = response.data.result;
 
-          resArr.forEach((element: IUpdate) => {
+
+          for (const res of resArr) {
+            const element: IUpdate = res;
+
             updateId = element.update_id;
             if (
               element.message &&
@@ -445,7 +448,7 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
               if(!withoutAuthorizedUsers) {
                 if(!element.message.from.username) {
                   // NOTE: when not set all messages forwards setting && without username, do nothing
-                  return;
+                  continue;
                 }
 
                 const authorizedUsers: string[] =
@@ -507,7 +510,7 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
                 text,
               });
             }
-          });
+          }
 
           await logseq.updateSettings({
             updateId,
