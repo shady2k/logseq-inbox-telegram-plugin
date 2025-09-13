@@ -431,14 +431,11 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
     const queryParams = currentUpdateId ? `?offset=${currentUpdateId + 1}&limit=100` : '?limit=100';
     const requestUrl = `https://api.telegram.org/bot${botToken}/getUpdates${queryParams}`;
 
-    fetch(requestUrl, {
+    logseq.Request._request({
+      url: requestUrl,
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors'
+      returnType: 'json'
     })
-      .then(response => response.json())
       .then(async function (response) {
         const telegramResponse = response as ITelegramResponse;
         if (telegramResponse && telegramResponse.ok) {
