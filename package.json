@@ -1,6 +1,6 @@
 {
   "name": "logseq-inbox-telegram-plugin",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A Logseq plugin that reads Telegram chat and pull messages to daily journal",
   "author": "shady2k",
   "license": "MIT",
@@ -9,6 +9,7 @@
     "build": "parcel build --public-url . --no-source-maps index.html"
   },
   "devDependencies": {
+    "@parcel/optimizer-terser": "2.15.4",
     "buffer": "6.0.3",
     "parcel": "2.15.4"
   },
@@ -16,6 +17,9 @@
     "@logseq/libs": "0.0.17",
     "axios": "1.12.1",
     "dayjs": "1.11.18"
+  },
+  "alias": {
+    "debug": false
   },
   "resolutions": {
     "debug": "4.3.4",
@@ -40,5 +44,15 @@
     "id": "_stfhku0m9",
     "title": "Inbox Telegram",
     "icon": "./icon.png"
+  },
+  "browserslist": [
+    "Chrome >= 88",
+    "Firefox >= 85",
+    "Safari >= 14",
+    "Edge >= 88"
+  ],
+  "@parcel/transformer-js": {
+    "inlineFS": false,
+    "inlineEnvironment": false
   }
 }
