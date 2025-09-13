@@ -1,6 +1,5 @@
 import "@logseq/libs";
 import { BlockEntity, SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin.user";
-import axios from "axios";
 import dayjs from "dayjs";
 
 let isProcessing = false;
@@ -38,6 +37,11 @@ interface IMessagesList {
 
 interface IGroup {
   [key: string]: string[];
+}
+
+interface ITelegramResponse {
+  ok: boolean;
+  result: IUpdate[];
 }
 
 function log(message: any) {
@@ -112,6 +116,8 @@ async function main() {
   }
 
   console.log("[Inbox Telegram] Started!");
+  
+  
   setTimeout(() => {
     process();
   }, 3000);
@@ -414,20 +420,30 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
     let messages: IMessagesList[] = [];
     const botToken = logseq.settings!.botToken;
 
+    const currentUpdateId = logseq.settings!.updateId as number | undefined;
+    
     const payload: IPayload = {
-      ...(logseq.settings!.updateId && {
-        offset: logseq.settings!.updateId + 1,
+      ...(currentUpdateId && {
+        offset: currentUpdateId + 1,
       }),
     };
 
-    axios
-      .post(`https://api.telegram.org/bot${botToken}/getUpdates`, payload)
-      .then(async function (response) {
-        if (response && response.data && response.data.ok) {
-          const resArr = response.data.result;
+    const queryParams = currentUpdateId ? `?offset=${currentUpdateId + 1}&limit=100` : '?limit=100';
+    const requestUrl = `https://api.telegram.org/bot${botToken}/getUpdates${queryParams}`;
 
-          resArr.forEach((element: IUpdate) => {
-            updateId = element.update_id;
+    logseq.Request._request({
+      url: requestUrl,
+      method: 'GET',
+      returnType: 'json'
+    })
+      .then(async function (response) {
+        const telegramResponse = response as ITelegramResponse;
+        if (telegramResponse && telegramResponse.ok) {
+          const resArr = telegramResponse.result;
+
+          if (resArr.length > 0) {
+            resArr.forEach((element: IUpdate) => {
+              updateId = element.update_id;
             if (
               element.message &&
               element.message.text &&
@@ -492,11 +508,12 @@ function getMessages(): Promise<IMessagesList[] | undefined> {
                 text,
               });
             }
-          });
+            });
 
-          await logseq.updateSettings({
-            updateId,
-          });
+            await logseq.updateSettings({
+              updateId,
+            });
+          }
 
           resolve(messages);
         } else {
